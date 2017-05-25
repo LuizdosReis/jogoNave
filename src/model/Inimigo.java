@@ -9,12 +9,17 @@ public class Inimigo extends Objeto{
 
 	private static int contador = 0;
 	
+	private boolean emDirecaoAEsquerda;
+	
 	public Inimigo(int x, int y) {
 
 		this.x = x;
 		this.y = y;
 
 		ImageIcon referencia;
+		
+		if(this.x > 0)
+			emDirecaoAEsquerda = true;
 
 		if(contador++ % 3 == 0){
 			referencia = new ImageIcon("res\\inimigo_5.gif");
@@ -32,11 +37,16 @@ public class Inimigo extends Objeto{
 	}
 
 	public void mexer(){
+		if(this.x < - 50)
+			emDirecaoAEsquerda = false;
+		
+		if(this.x > 550)
+			emDirecaoAEsquerda = true;
 
-		if(this.x < 0){
-			this.x = LARGURA_TELA;
-		} else {
+		if(emDirecaoAEsquerda){
 			this.x -= VELOCIDADE;
+		} else {
+			this.x += VELOCIDADE;
 		}
 		
 	}

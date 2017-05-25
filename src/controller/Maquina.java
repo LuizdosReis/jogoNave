@@ -1,6 +1,7 @@
 package controller;
 
 import view.ContainerDeJanelas;
+import view.Estado;
 import view.Fase;
 
 public class Maquina {
@@ -10,18 +11,7 @@ public class Maquina {
 	
 	
 	public void start(){	
-//		this.estadoAtual = new Menu();
-//		container = new ContainerDeJanelas(this.estadoAtual.getComponent());
 		container = new ContainerDeJanelas(new Fase());
-//		container.trocarTela(new Fase());
-//		do{
-//			this.estadoAtual.atualiza();
-//			if (this.estadoAtual.isTerminou()){
-//				this.estadoAtual.removeKeyListener();
-//				this.estadoAtual = this.estadoAtual.getProximoEstado();
-//				container.trocarTela(this.estadoAtual.getComponent());
-//			}
-//		}while(true);
 	};
 	
 	

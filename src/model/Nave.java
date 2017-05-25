@@ -54,17 +54,26 @@ public class Nave extends Objeto{
 		return misseis;
 	}
 
-	public void atira(){
-		this.misseis.add(new Missel(x+largura, y + altura/2 ));
+	public void atiraParaDireita(){
+		this.misseis.add(new Missel(x+largura, y + altura/2,Direcao.direita));
+	}
+	
+	public void atiraParaEsquerda(){
+		this.misseis.add(new Missel(x-largura, y + altura/2,Direcao.esquerda));
 	}
 
 	public void keyPressed(KeyEvent tecla){
 		
 		int codigo = tecla.getKeyCode();
 		
-		if(codigo == KeyEvent.VK_SPACE){
-			atira();
+		if(codigo == KeyEvent.VK_2){
+			atiraParaDireita();
 		}
+		
+		if(codigo == KeyEvent.VK_1){
+			atiraParaEsquerda();
+		}
+
 
 		if(codigo == KeyEvent.VK_UP){
 			dy = -1;

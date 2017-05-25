@@ -2,6 +2,8 @@ package controller;
 
 import java.awt.Component;
 
+import view.Estado;
+
 public class Creditos extends Estado {
 	
 	

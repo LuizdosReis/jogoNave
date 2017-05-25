@@ -3,6 +3,7 @@ package controller;
 import java.awt.Component;
 import java.awt.event.KeyListener;
 
+import view.Estado;
 import view.MenuPainel;
 
 public class Menu extends Estado{

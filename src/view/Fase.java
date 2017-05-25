@@ -11,6 +11,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import javax.swing.ImageIcon;
@@ -27,20 +28,16 @@ public class Fase extends JPanel implements ActionListener {
 	private Nave nave;
 	private Timer timer;
 
-	private boolean emJogo;
-	private boolean emMenu;
-	private boolean emVitoria;
-	private boolean emDerrota;
+	private Estado estado;
+	private HashMap<Integer, Estado> estados = new HashMap<Integer, Estado>();
 
 	private List<Inimigo> inimigos;
 
-	private int[][] coordenadas = { { 2380, 29 }, { 2600, 59 }, { 1380, 89 },
-			{ 780, 109 }, { 580, 139 }, { 880, 239 }, { 790, 259 },
-			{ 760, 50 }, { 790, 150 }, { 1980, 209 }, { 560, 45 }, { 510, 70 },
-			{ 930, 159 }, { 590, 80 }, { 530, 60 }, { 940, 59 }, { 990, 30 },
-			{ 920, 200 }, { 900, 259 }, { 660, 50 }, { 540, 90 }, { 810, 220 },
-			{ 860, 20 }, { 740, 180 }, { 820, 128 }, { 490, 170 }, { 700, 30 },
-			{ 920, 300 }, { 856, 328 }, { 456, 320 } };
+	private int[][] coordenadas = { { 2380, 29 }, { 2600, 59 }, { 1380, 89 }, { -780, 109 }, { 580, 139 }, { 880, 239 },
+			{ 790, 259 }, { -760, 50 }, { 790, 150 }, { -1980, 209 }, { 560, 45 }, { 510, 70 }, { 930, 159 }, { -590, 80 },
+			{ -530, 60 }, { 940, 59 }, { -990, 30 }, { -920, 200 }, { 900, 259 }, { -660, 50 }, { -540, 90 }, { 810, 220 },
+			{ -860, 20 }, { 740, 180 }, { 820, 128 }, { -490, 170 }, { 700, 30 }, { 920, 300 }, { -856, 328 },
+			{ -456, 320 } };
 
 	public Fase() {
 
@@ -50,14 +47,12 @@ public class Fase extends JPanel implements ActionListener {
 
 		ImageIcon referencia = new ImageIcon("res\\fundo_2.jpg");
 		fundo = referencia.getImage();
-//		nave = new Nave();
 
-		emJogo = false;
-		emMenu = true;
-		emVitoria = false;
-		emDerrota = false;
+		estados.put(KeyEvent.VK_ENTER, new EmMenu());
 
-//		inicializaInimigos();
+		estados.put(KeyEvent.VK_NUMPAD1, new EmJogo(nave, inimigos, this));
+
+		estado = estados.get(KeyEvent.VK_ENTER);
 
 		timer = new Timer(5, this);
 		timer.start();
@@ -78,89 +73,46 @@ public class Fase extends JPanel implements ActionListener {
 	public void paint(Graphics g) {
 		Graphics2D graficos = (Graphics2D) g;
 		graficos.drawImage(fundo, 0, 0, null);
-		
-		if (emMenu){
-			graficos.setColor(Color.WHITE);
-			graficos.setFont(new Font("castellar", Font.PLAIN, 20));
-			graficos.drawString("1 - Iniciar", 180, 150);
-			graficos.drawString("2 - Créditos ( Em desenvolvimento )", 30, 180);
-		}else if (emJogo) {
 
-			graficos.drawImage(nave.getImagem(), nave.getX(), nave.getY(), this);
+		estado.desenha(graficos);
 
-			List<Missel> misseis = nave.getMisseis();
-
-			for (int i = 0; i < misseis.size(); i++) {
-
-				Missel m = (Missel) misseis.get(i);
-				graficos.drawImage(m.getImagem(), m.getX(), m.getY(), this);
-
-			}
-
-			for (int i = 0; i < inimigos.size(); i++) {
-
-				Inimigo in = inimigos.get(i);
-				graficos.drawImage(in.getImagem(), in.getX(), in.getY(), this);
-
-			}
-
-			graficos.setColor(Color.WHITE);
-			graficos.drawString("INIMIGOS: " + inimigos.size(), 5, 15);
-			
-		} else if (emVitoria){
-			
-			ImageIcon fimJogo = new ImageIcon("res\\vitoria.png");
-			
-			graficos.drawImage(fimJogo.getImage(), 0, 0, null);
-			
-			
-		} else {
-			ImageIcon fimJogo = new ImageIcon("res\\game_over.jpg");
-			
-			graficos.drawImage(fimJogo.getImage(), 0, 0, null);
-			
-		}
-		
 		g.dispose();
 
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
-		if (emJogo){
+		if (estado.getClass() == EmJogo.class) {
 			if (inimigos.size() == 0) {
-				emJogo = false;
-				emMenu = false;
-				emDerrota = false;
-				emVitoria = true;
+				estado = new EmVitoria();
 			}
-			
+
 			List<Missel> misseis = nave.getMisseis();
-			
+
 			for (int i = 0; i < misseis.size(); i++) {
-				
+
 				Missel m = (Missel) misseis.get(i);
-				
+
 				if (m.isVisivel()) {
 					m.mexer();
 				} else {
 					misseis.remove(i);
 				}
-				
+
 			}
-			
+
 			for (int i = 0; i < inimigos.size(); i++) {
-				
+
 				Inimigo in = inimigos.get(i);
-				
+
 				if (in.isVisivel()) {
 					in.mexer();
 				} else {
 					inimigos.remove(i);
 				}
-				
+
 			}
-			
+
 			nave.mexer();
 			checarColisoes();
 		}
@@ -183,10 +135,7 @@ public class Fase extends JPanel implements ActionListener {
 				nave.setVisivel(false);
 				tempInimigo.setVisivel(false);
 
-				emJogo = false;
-				emMenu = false;
-				emVitoria = false;
-				emDerrota = true;
+				estado = new EmDerrota();
 			}
 
 		}
@@ -220,31 +169,27 @@ public class Fase extends JPanel implements ActionListener {
 
 		@Override
 		public void keyPressed(KeyEvent e) {
-			System.out.println("fase");
-			if (emVitoria || emDerrota){
-				if(e.getKeyCode() == KeyEvent.VK_ENTER){
-					emVitoria = false;
-					emDerrota = false;
-					emJogo = false;
-					emMenu = true;
-				}
-			}else if (emMenu){
-				if (e.getKeyCode() == 97 || e.getKeyCode() == 49){
-					emJogo = true;
-					emVitoria = false;
-					emDerrota = false;
-					emMenu = false;
+			if (estado.getClass() == EmDerrota.class || estado.getClass() == EmVitoria.class) {
+				if (estados.containsKey(e.getKeyCode()))
+					estado = estados.get(e.getKeyCode());
+			} else if (estado.getClass() == EmMenu.class) {
+				if (estados.containsKey(e.getKeyCode())) {
+					estado = estados.get(e.getKeyCode());
+					EmJogo emJogo = (EmJogo) estado;
 					nave = new Nave();
-					inicializaInimigos();				
+					emJogo.setNave(nave);
+					inicializaInimigos();
+					emJogo.setInimigos(inimigos);
 				}
-			}else if (emJogo){
+
+			} else if (estado.getClass() == EmJogo.class) {
 				nave.keyPressed(e);
 			}
 		}
 
 		@Override
 		public void keyReleased(KeyEvent e) {
-			if (emJogo){
+			if (estado.getClass() == EmJogo.class) {
 				nave.keyReleased(e);
 			}
 		}
