@@ -124,7 +124,7 @@ public class Fase extends JPanel implements ActionListener {
 		Rectangle formaNave = nave.getBounds();
 		Rectangle formaInimigo;
 		Rectangle formaMissel;
-
+		 
 		for (int i = 0; i < inimigos.size(); i++) {
 
 			Inimigo tempInimigo = inimigos.get(i);
