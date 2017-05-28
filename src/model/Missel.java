@@ -30,11 +30,6 @@ public class Missel extends Objeto{
 			this.x += VELOCIDADE;
 		else
 			this.x -= VELOCIDADE;
-		
-		if(this.x > LARGURA_TELA || this.x < 0){
-			isVisivel = false;
-		}
-		
 	}
 	
 }

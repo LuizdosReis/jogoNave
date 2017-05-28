@@ -1,27 +1,28 @@
 package view;
 
-
 import java.awt.Component;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 
 import javax.swing.JFrame;
 
-public class ContainerDeJanelas extends JFrame{
-	
-	public ContainerDeJanelas(Component inicial){
+public class ContainerDeJanelas extends JFrame {
+
+	public ContainerDeJanelas(Component componente) {
 		setTitle("Nave");
-		getContentPane().add(inicial);
+		getContentPane().add(componente);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setSize(500,420);
+		setSize(500, 420);
 		setLocationRelativeTo(null);
 		setResizable(false);
 		setVisible(true);
 	}
-	
-	public void trocarTela(Component novo){
+
+	public void trocarTela(Component novo) {
 		getContentPane().removeAll();
-        getContentPane().add( novo );
-		revalidate();
+		getContentPane().add(novo);
 		repaint();
+		revalidate();
 	}
-	
+
 }

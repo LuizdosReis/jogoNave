@@ -1,6 +1,6 @@
 package model;
 
 public enum Direcao {
-	direita,esquerda;
+	direita,esquerda,cima,baixo;
 
 }
