@@ -26,10 +26,15 @@ public class Missel extends Objeto{
 
 	public void mexer(){
 		
-		if(direcao == Direcao.direita)
+		if(this.direcao == Direcao.DIREITA){
 			this.x += VELOCIDADE;
-		else
+		}else if(this.direcao == Direcao.ESQUERDA){
 			this.x -= VELOCIDADE;
+		}else if(this.direcao == Direcao.CIMA){
+			this.y -= VELOCIDADE;
+		}else{
+			this.y += VELOCIDADE;
+		}
 	}
 	
 }

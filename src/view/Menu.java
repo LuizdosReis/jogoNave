@@ -41,6 +41,7 @@ public class Menu extends JPanel {
 			public void keyPressed(KeyEvent e) {
 				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
 					new Fase();
+					
 				}
 
 			}

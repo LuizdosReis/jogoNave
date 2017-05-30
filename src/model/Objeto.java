@@ -26,6 +26,10 @@ public abstract class Objeto {
 		return isVisivel;
 	}
 	
+	public int getAltura() {
+		return altura;
+	}
+	
 	public void setVisivel(boolean isVisivel) {
 		this.isVisivel = isVisivel;
 	}
