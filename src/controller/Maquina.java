@@ -1,12 +1,11 @@
 package controller;
 
-import view.ContainerDeJanelas;
-import view.Menu;
+import view.Janela;
 
 public class Maquina {
 	
 	public void start(){	
-		new Menu();
+		new Janela();
 	};
 	
 }

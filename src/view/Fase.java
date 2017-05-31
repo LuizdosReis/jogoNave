@@ -1,128 +1,66 @@
 package view;
 
 import java.awt.Color;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
-import javax.swing.ImageIcon;
-import javax.swing.JPanel;
-import javax.swing.Timer;
-
 import model.Direcao;
 import model.Inimigo;
+import model.ItemForca;
+import model.ItemVida;
 import model.Missel;
 import model.Nave;
 
-public class Fase extends JPanel implements ActionListener {
+public class Fase implements Estado {
 
-	private Image fundo;
 	private Nave nave;
-	private Timer timer;
 	private List<Inimigo> inimigos;
 
-	private ContainerDeJanelas containerDeJanelas;
+	private int QUANTIDADE_INIMIGOS = 10;
+
 	private HashMap<Integer, Direcao> direcoesInimigo;
-	private int countInimigo = 10;
-	private int inimigosRestantes = 10;
-
+	private boolean valido;
+	private Estado proximoEstado;
+	private ItemVida itemVida;
+	private ItemForca itemForca;
+	
 	public Fase() {
-		setFocusable(true);
-		setDoubleBuffered(true);
-
-		new ContainerDeJanelas(this);
-
-		addKeyListener(new KeyListener() {
-
-			@Override
-			public void keyReleased(KeyEvent e) {
-				nave.keyReleased(e);
-			}
-
-			@Override
-			public void keyPressed(KeyEvent e) {
-				nave.keyPressed(e);
-
-			}
-
-			@Override
-			public void keyTyped(KeyEvent e) {
-
-			}
-		});
-
-		ImageIcon referencia = new ImageIcon("res\\fundo_2.jpg");
-		fundo = referencia.getImage();
 
 		nave = new Nave();
-		
+
 		direcoesInimigo = new HashMap<Integer, Direcao>();
 		direcoesInimigo.put(0, Direcao.BAIXO);
 		direcoesInimigo.put(1, Direcao.CIMA);
 		direcoesInimigo.put(2, Direcao.DIREITA);
 		direcoesInimigo.put(3, Direcao.ESQUERDA);
-		
+
 		inicializaInimigos();
 
-		timer = new Timer(5, this);
-		timer.start();
-
+		valido = true;
 	}
 
 	public void inicializaInimigos() {
 
 		inimigos = new ArrayList<Inimigo>();
 
-		for (int i = 0; i < countInimigo; i++) {
+		for (int i = 0; i < QUANTIDADE_INIMIGOS; i++) {
 			int j = new Random().nextInt(3);
 			inimigos.add(new Inimigo(direcoesInimigo.get(j)));
 		}
 
 	}
 
-	public void paint(Graphics g) {
-		Graphics2D graficos = (Graphics2D) g;
-		graficos.drawImage(fundo, 0, 0, null);
-
-		graficos.drawImage(nave.getImagem(), nave.getX(), nave.getY(), null);
-
-		List<Missel> misseis = nave.getMisseis();
-
-		for (int i = 0; i < misseis.size(); i++) {
-
-			Missel m = (Missel) misseis.get(i);
-			graficos.drawImage(m.getImagem(), m.getX(), m.getY(), null);
-
-		}
-
-		for (int i = 0; i < inimigos.size(); i++) {
-
-			Inimigo in = inimigos.get(i);
-			graficos.drawImage(in.getImagem(), in.getX(), in.getY(), null);
-
-		}
-
-		graficos.setColor(Color.WHITE);
-		graficos.drawString("INIMIGOS: " + inimigos.size(), 5, 15);
-
-		g.dispose();
-
-	}
-
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
 		if (inimigos.size() == 0) {
-			new Chefao(this.nave);
-			timer.stop();
+			proximoEstado = new Chefao(nave);
+			valido = false;
 		}
 
 		List<Missel> misseis = nave.getMisseis();
@@ -151,9 +89,16 @@ public class Fase extends JPanel implements ActionListener {
 
 		}
 
+		if (nave.getVida() <= 25 && this.itemVida == null) {
+			this.itemVida = new ItemVida();
+		}
+
+		if (this.inimigos.size() <= 5 && this.itemForca == null && this.nave.getForca() < 100) {
+			this.itemForca = new ItemForca();
+		}
+
 		nave.mexer();
 		checarColisoes();
-		repaint();
 	}
 
 	public void checarColisoes() {
@@ -161,15 +106,21 @@ public class Fase extends JPanel implements ActionListener {
 		Rectangle formaNave = nave.getBounds();
 		Rectangle formaInimigo;
 		Rectangle formaMissel;
-		 
+		Rectangle formaItemVida;
+		Rectangle formaItemForca;
+
 		for (int i = 0; i < inimigos.size(); i++) {
 
 			Inimigo tempInimigo = inimigos.get(i);
 			formaInimigo = tempInimigo.getBounds();
 
 			if (formaNave.intersects(formaInimigo)) {
-				new Derrota();
-				timer.stop();
+				nave.dano(25);
+				inimigos.get(i).setVisivel(false);
+				if (nave.getVida() <= 0) {
+					proximoEstado = new Derrota();
+					valido = false;
+				}
 			}
 
 		}
@@ -197,6 +148,76 @@ public class Fase extends JPanel implements ActionListener {
 
 		}
 
+		if (itemVida != null) {
+			formaItemVida = itemVida.getBounds();
+			if (formaNave.intersects(formaItemVida)) {
+				nave.setVida(100);
+				itemVida = null;
+			}
+		}
+
+		if (itemForca != null) {
+			formaItemForca = itemForca.getBounds();
+			if (formaNave.intersects(formaItemForca)) {
+				nave.dobrarForca();
+				itemForca = null;
+			}
+		}
+
+	}
+
+	@Override
+	public void keyReleased(KeyEvent e) {
+		nave.keyReleased(e);
+	}
+
+	@Override
+	public void keyPressed(KeyEvent e) {
+		nave.keyPressed(e);
+	}
+
+	@Override
+	public void paint(Graphics2D graficos) {
+		graficos.drawImage(nave.getImagem(), nave.getX(), nave.getY(), null);
+
+		List<Missel> misseis = nave.getMisseis();
+
+		for (int i = 0; i < misseis.size(); i++) {
+
+			Missel m = (Missel) misseis.get(i);
+			graficos.drawImage(m.getImagem(), m.getX(), m.getY(), null);
+
+		}
+
+		for (int i = 0; i < inimigos.size(); i++) {
+
+			Inimigo in = inimigos.get(i);
+			graficos.drawImage(in.getImagem(), in.getX(), in.getY(), null);
+
+		}
+		
+		if (this.itemVida != null){
+			graficos.drawImage(itemVida.getImagem(), itemVida.getX(), itemVida.getY(), null);
+		}
+		
+		if (this.itemForca != null){
+			graficos.drawImage(itemForca.getImagem(), itemForca.getX(), itemForca.getY(), null);
+		}
+
+		graficos.setColor(Color.WHITE);
+		graficos.drawString("INIMIGOS: " + inimigos.size(), 5, 15);
+		graficos.drawString("Vida: " + nave.getVida() + "%", 5, 35);
+		graficos.drawString("Força: "+nave.getForca()+"%", 5, 55);
+	}
+
+	@Override
+	public Estado getProximoEstado() {
+		return proximoEstado;
+	}
+
+	@Override
+	public boolean isValido() {
+		return valido;
 	}
 
 }

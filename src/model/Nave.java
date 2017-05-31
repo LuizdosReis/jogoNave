@@ -2,6 +2,7 @@ package model;
 
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.swing.ImageIcon;
@@ -11,8 +12,12 @@ public class Nave extends Objeto {
 	private int dx, dy;
 
 	private Direcao direcao;
-	
+
 	private List<Missel> misseis;
+
+	private int vida;
+	private int forca;
+	private long momentoDano;
 
 	public Nave() {
 
@@ -23,7 +28,10 @@ public class Nave extends Objeto {
 		largura = imagem.getWidth(null);
 
 		misseis = new ArrayList<Missel>();
-		
+
+		this.vida = 100;
+		this.forca = 5;
+
 		direcao = Direcao.DIREITA;
 
 		this.x = 100;
@@ -52,6 +60,25 @@ public class Nave extends Objeto {
 			y = 340;
 		}
 
+	}
+
+	public int getVida() {
+		return vida;
+	}
+
+	public void dano(Integer dano) {
+		if (momentoDano <  new Date().getTime() - 600){
+			this.vida -= dano;
+			momentoDano = new Date().getTime();
+		}
+	}
+
+	public int getForca() {
+		return forca;
+	}
+
+	public void setForca(int forca) {
+		this.forca = forca;
 	}
 
 	public List<Missel> getMisseis() {
@@ -132,6 +159,14 @@ public class Nave extends Objeto {
 			dx = 0;
 		}
 
+	}
+
+	public void setVida(int vida) {
+		this.vida = vida;
+	}
+
+	public void dobrarForca() {
+		this.forca = this.forca * 2 <= 100 ? this.forca *= 2 : 100;
 	}
 
 }

@@ -5,10 +5,10 @@ import java.util.Random;
 
 import javax.swing.ImageIcon;
 
+import view.ContainerDeJanelas;
+
 public class Inimigo extends Objeto {
 
-	private static final int LARGURA_TELA = 500;
-	private static final int ALTURA_TELA = 550;
 	private static final int VELOCIDADE = 1;
 
 	private static int contador = 0;
@@ -18,17 +18,17 @@ public class Inimigo extends Objeto {
 	public Inimigo(Direcao direcao) {
 
 		if (direcao == Direcao.BAIXO) {
-			this.y = -100;
-			this.x = new Random().nextInt(LARGURA_TELA - 50);
+			this.y = 1;
+			this.x = new Random().nextInt(ContainerDeJanelas.LARGURA_TELA - 50);
 		} else if (direcao == Direcao.CIMA) {
-			this.y = ALTURA_TELA + 100;
-			this.x = new Random().nextInt(LARGURA_TELA - 50);
+			this.y = ContainerDeJanelas.ALTURA_TELA;
+			this.x = new Random().nextInt(ContainerDeJanelas.LARGURA_TELA - 50);
 		} else if (direcao == Direcao.ESQUERDA) {
-			this.x = LARGURA_TELA + 100;
-			this.y = new Random().nextInt(ALTURA_TELA - 50);
+			this.x = ContainerDeJanelas.LARGURA_TELA;
+			this.y = new Random().nextInt(ContainerDeJanelas.ALTURA_TELA - 50);
 		} else {
-			this.x = -100;
-			this.y = new Random().nextInt(ALTURA_TELA - 50);
+			this.x = 1;
+			this.y = new Random().nextInt(ContainerDeJanelas.ALTURA_TELA - 50);
 		}
 
 		this.direcao = direcao;
@@ -66,9 +66,16 @@ public class Inimigo extends Objeto {
 			this.x += VELOCIDADE;
 		}
 
-		if (this.x > 1000 || this.y > 1000 || this.x < -200 || this.y < -200) {
-			isVisivel = false;
-		}
-	}
+		if (this.x > ContainerDeJanelas.LARGURA_TELA - 20)
+			direcao = Direcao.ESQUERDA;
+		
+		if (this.x <= 1)
+			direcao = Direcao.DIREITA;
 
+		if (this.y > ContainerDeJanelas.ALTURA_TELA - 20)
+			direcao = Direcao.CIMA;
+
+		if (this.y < 1)
+			direcao = Direcao.BAIXO;
+	}
 }

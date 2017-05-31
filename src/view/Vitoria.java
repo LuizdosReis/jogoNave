@@ -3,52 +3,57 @@ package view;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 
-public class Vitoria extends JPanel {
+public class Vitoria implements Estado{
 
-	private Image fundo;
+
+
+	private boolean valido;
+	private Estado proximoEstado;
 
 	public Vitoria() {
-		setFocusable(true);
-		setDoubleBuffered(true);
-
-		new ContainerDeJanelas(this);
-
-		addKeyListener(new KeyListener() {
-
-			@Override
-			public void keyReleased(KeyEvent e) {
-
-			}
-
-			@Override
-			public void keyPressed(KeyEvent e) {
-				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-					new Menu();
-				}
-			}
-
-			@Override
-			public void keyTyped(KeyEvent e) {
-
-			}
-		});
-
-		ImageIcon referencia = new ImageIcon("res\\fundo_2.jpg");
-		fundo = referencia.getImage();
+		valido = true;
 	}
 
-	public void paint(Graphics g) {
-		Graphics2D graficos = (Graphics2D) g;
-		graficos.drawImage(fundo, 0, 0, null);
-		ImageIcon fimJogo = new ImageIcon("res\\vitoria.png");
-		graficos.drawImage(fimJogo.getImage(), 0, 0, null);
+	@Override
+	public void keyReleased(KeyEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
 
+	@Override
+	public void keyPressed(KeyEvent e) {
+		if(e.getKeyCode() == KeyEvent.VK_ENTER){
+			proximoEstado = new Menu();
+			valido = false;
+		}	
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		// TODO Auto-generated method stub		
+	}
+
+	@Override
+	public void paint(Graphics2D graficos) {
+		ImageIcon fimJogo = new ImageIcon("res\\vitoria.png");
+		graficos.drawImage(fimJogo.getImage(), 0, 0, null);		
+	}
+
+	@Override
+	public Estado getProximoEstado() {
+		return proximoEstado;
+	}
+
+	@Override
+	public boolean isValido() {
+		return valido;
 	}
 
 }

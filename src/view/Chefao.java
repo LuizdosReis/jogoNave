@@ -1,111 +1,39 @@
 package view;
 
 import java.awt.Color;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.util.List;
-
-import javax.swing.ImageIcon;
-import javax.swing.JPanel;
-import javax.swing.Timer;
 
 import model.Boss;
 import model.Missel;
 import model.Nave;
 
-public class Chefao extends JPanel implements ActionListener {
+public class Chefao implements Estado{
 
-	private Image fundo;
-	private Nave naveBoss;
+	
+	private Nave nave;
 	private Boss boss;
-	private int vidaBoss = 100;
-	private Timer timer;
-
+	private boolean valido;
+	private Estado proximoEstado;
+	
 	public Chefao(Nave nave) {
-		setFocusable(true);
-		setDoubleBuffered(true);
-		
-		ImageIcon referencia = new ImageIcon("res\\fundo_2.jpg");
-		fundo = referencia.getImage();
-
-		new ContainerDeJanelas(this);
-		
-		this.naveBoss = new Nave();
-
-		addKeyListener(new KeyListener() {
-
-			@Override
-			public void keyReleased(KeyEvent e) {
-				naveBoss.keyReleased(e);
-			}
-
-			@Override
-			public void keyPressed(KeyEvent e) {
-				naveBoss.keyPressed(e);
-
-			}
-
-			@Override
-			public void keyTyped(KeyEvent e) {
-
-			}
-		});
-
-		
+		this.nave = nave;
 		this.boss = new Boss();
-
-		timer = new Timer(5, this);
-		timer.start();
-
-	}
-
-	public void paint(Graphics g) {
-		Graphics2D graficos = (Graphics2D) g;
-		graficos.drawImage(fundo, 0, 0, null);
-
-		graficos.drawImage(naveBoss.getImagem(), naveBoss.getX(), naveBoss.getY(), this);
-
-		List<Missel> misseis = naveBoss.getMisseis();
-
-		for (int i = 0; i < misseis.size(); i++) {
-
-			Missel m = (Missel) misseis.get(i);
-			graficos.drawImage(m.getImagem(), m.getX(), m.getY(), this);
-
-		}
-
-		List<Missel> misseisBoss = boss.getMisseis();
-
-		for (int i = 0; i < misseisBoss.size(); i++) {
-
-			Missel m = (Missel) misseisBoss.get(i);
-			graficos.drawImage(m.getImagem(), m.getX(), m.getY(), this);
-
-		}
-
-		graficos.drawImage(boss.getImagem(), boss.getX(), boss.getY(), this);
-
-		graficos.setColor(Color.WHITE);
-		graficos.drawString("Vida Boss: " + vidaBoss + "%", 5, 15);
-
-		g.dispose();
+		this.valido = true;
 
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
-		if (vidaBoss == 0) {
-			new Vitoria();
-			timer.stop();
+		if (boss.getVida() == 0) {
+			proximoEstado = new Vitoria();
+			valido = false;
 		}
 
-		List<Missel> misseis = naveBoss.getMisseis();
+		List<Missel> misseis = nave.getMisseis();
 
 		for (int i = 0; i < misseis.size(); i++) {
 
@@ -133,28 +61,30 @@ public class Chefao extends JPanel implements ActionListener {
 
 		}
 
-		if (naveBoss.getY() == boss.getY() + boss.getAltura() / 2) {
+		if (nave.getY() == boss.getY() + boss.getAltura() / 2) {
 			boss.atirar();
 		}
 
-		naveBoss.mexer();
+		nave.mexer();
 		boss.mexer();
 		checarColisoes();
-		repaint();
 	}
 
 	public void checarColisoes() {
 
-		Rectangle formaNave = naveBoss.getBounds();
+		Rectangle formaNave = nave.getBounds();
 		Rectangle formaBoss = boss.getBounds();
 		Rectangle formaMissel;
 
 		if (formaNave.intersects(formaBoss)) {
-			new Derrota();
-			timer.stop();
+			nave.dano(25);
+			if (nave.getVida() <= 0) {
+				proximoEstado = new Derrota();
+				valido = false;
+			}
 		}
 
-		List<Missel> misseis = naveBoss.getMisseis();
+		List<Missel> misseis = nave.getMisseis();
 
 		for (int i = 0; i < misseis.size(); i++) {
 
@@ -164,8 +94,7 @@ public class Chefao extends JPanel implements ActionListener {
 			if (formaMissel.intersects(formaBoss)) {
 				Missel missel = misseis.get(i);
 				missel.setVisivel(false);
-				vidaBoss -= 5;
-
+				boss.dano(nave.getForca());
 			}
 
 		}
@@ -178,12 +107,67 @@ public class Chefao extends JPanel implements ActionListener {
 			formaMissel = tempMissel.getBounds();
 
 			if (formaMissel.intersects(formaNave)) {
-
-				new Derrota();
-				timer.stop();
+				nave.dano(25);
+				misseisBoss.get(i).setVisivel(false);
+				if (nave.getVida() <= 0) {
+					proximoEstado = new Derrota();
+					valido = false;
+				}			
 			}
 
 		}
 
+	}
+
+	@Override
+	public void keyReleased(KeyEvent e) {
+		nave.keyReleased(e);
+	}
+
+	@Override
+	public void keyPressed(KeyEvent e) {
+		nave.keyPressed(e);
+		
+	}
+
+	@Override
+	public void paint(Graphics2D graficos) {
+		graficos.drawImage(nave.getImagem(), nave.getX(), nave.getY(), null);
+
+		List<Missel> misseis = nave.getMisseis();
+
+		for (int i = 0; i < misseis.size(); i++) {
+
+			Missel m = (Missel) misseis.get(i);
+			graficos.drawImage(m.getImagem(), m.getX(), m.getY(), null);
+
+		}
+
+		List<Missel> misseisBoss = boss.getMisseis();
+
+		for (int i = 0; i < misseisBoss.size(); i++) {
+
+			Missel m = (Missel) misseisBoss.get(i);
+			graficos.drawImage(m.getImagem(), m.getX(), m.getY(), null);
+
+		}
+
+		graficos.drawImage(boss.getImagem(), boss.getX(), boss.getY(), null);
+
+		graficos.setColor(Color.WHITE);
+		graficos.drawString("Vida Boss: " + boss.getVida() + "%", 5, 15);
+		graficos.drawString("Vida: "+nave.getVida()+"%", 5, 35);
+		graficos.drawString("Força: "+nave.getForca()+"%", 5, 55);
+		
+	}
+
+	@Override
+	public Estado getProximoEstado() {
+		return proximoEstado;
+	}
+
+	@Override
+	public boolean isValido() {
+		return valido;
 	}
 }
