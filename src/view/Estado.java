@@ -12,6 +12,7 @@ public interface Estado {
 	public void paint(Graphics2D graficos);
 	public Estado getProximoEstado();
 	public boolean isValido();
+	public void checarColisoes();
 	
 	
 

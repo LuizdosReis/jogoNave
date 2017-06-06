@@ -1,14 +1,10 @@
 package view;
 
-import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 
 import javax.swing.ImageIcon;
-import javax.swing.JPanel;
 
 public class Vitoria implements Estado{
 
@@ -54,6 +50,12 @@ public class Vitoria implements Estado{
 	@Override
 	public boolean isValido() {
 		return valido;
+	}
+
+	@Override
+	public void checarColisoes() {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

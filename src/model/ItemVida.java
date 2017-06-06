@@ -10,8 +10,8 @@ public class ItemVida extends Objeto{
 
 	public ItemVida() {
 
-		this.x = new Random().nextInt(ContainerDeJanelas.LARGURA_TELA);
-		this.y = new Random().nextInt(ContainerDeJanelas.ALTURA_TELA);
+		this.x = new Random().nextInt(ContainerDeJanelas.LARGURA_TELA-60);
+		this.y = new Random().nextInt(ContainerDeJanelas.ALTURA_TELA-80);
 		
 		ImageIcon referencia = new ImageIcon("res\\vida.gif");
 		imagem = referencia.getImage();

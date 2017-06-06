@@ -10,8 +10,8 @@ public class ItemForca extends Objeto{
 
 	public ItemForca() {
 
-		this.x = new Random().nextInt(ContainerDeJanelas.LARGURA_TELA);
-		this.y = new Random().nextInt(ContainerDeJanelas.ALTURA_TELA);
+		this.x = new Random().nextInt(ContainerDeJanelas.LARGURA_TELA-60);
+		this.y = new Random().nextInt(ContainerDeJanelas.ALTURA_TELA-80);
 		
 		ImageIcon referencia = new ImageIcon("res\\forca.gif");
 		imagem = referencia.getImage();

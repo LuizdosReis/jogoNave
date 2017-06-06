@@ -8,8 +8,8 @@ import javax.swing.JFrame;
 
 public class ContainerDeJanelas extends JFrame {
 	
-	public static final int ALTURA_TELA = 400;
-	public static final int LARGURA_TELA = 500;
+	public static final int ALTURA_TELA = 550;
+	public static final int LARGURA_TELA = 740;
 
 
 	public ContainerDeJanelas(Component componente) {

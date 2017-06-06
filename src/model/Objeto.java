@@ -8,7 +8,7 @@ public abstract class Objeto {
 	protected int x, y;
 	protected int largura, altura;
 	protected boolean isVisivel;
-	
+	protected Direcao direcao;
 	
 	public int getX() {
 		return x;

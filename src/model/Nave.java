@@ -7,13 +7,14 @@ import java.util.List;
 
 import javax.swing.ImageIcon;
 
+import view.ContainerDeJanelas;
+
 public class Nave extends Objeto {
 
 	private int dx, dy;
 
-	private Direcao direcao;
 
-	private List<Missel> misseis;
+	private List<Objeto> misseis;
 
 	private int vida;
 	private int forca;
@@ -27,7 +28,7 @@ public class Nave extends Objeto {
 		altura = imagem.getHeight(null);
 		largura = imagem.getWidth(null);
 
-		misseis = new ArrayList<Missel>();
+		misseis = new ArrayList<Objeto>();
 
 		this.vida = 100;
 		this.forca = 5;
@@ -48,16 +49,16 @@ public class Nave extends Objeto {
 			x = 1;
 		}
 
-		if (this.x > 462) {
-			x = 462;
+		if (this.x > ContainerDeJanelas.LARGURA_TELA-40) {
+			x = ContainerDeJanelas.LARGURA_TELA-40;
 		}
 
 		if (this.y < 1) {
 			y = 1;
 		}
 
-		if (this.y > 340) {
-			y = 340;
+		if (this.y > ContainerDeJanelas.ALTURA_TELA-60) {
+			y = ContainerDeJanelas.ALTURA_TELA-60;
 		}
 
 	}
@@ -81,7 +82,7 @@ public class Nave extends Objeto {
 		this.forca = forca;
 	}
 
-	public List<Missel> getMisseis() {
+	public List<Objeto> getMisseis() {
 		return misseis;
 	}
 
@@ -118,22 +119,22 @@ public class Nave extends Objeto {
 		}
 
 		if (codigo == KeyEvent.VK_UP) {
-			dy = -1;
+			dy = -2;
 			this.direcao = Direcao.CIMA;
 		}
 
 		if (codigo == KeyEvent.VK_DOWN) {
-			dy = 1;
+			dy = 2;
 			this.direcao = Direcao.BAIXO;
 		}
 
 		if (codigo == KeyEvent.VK_LEFT) {
-			dx = -1;
+			dx = -2;
 			this.direcao = Direcao.ESQUERDA;
 		}
 
 		if (codigo == KeyEvent.VK_RIGHT) {
-			dx = 1;
+			dx = 2;
 			this.direcao = Direcao.DIREITA;
 		}
 

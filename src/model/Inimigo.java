@@ -13,7 +13,6 @@ public class Inimigo extends Objeto {
 
 	private static int contador = 0;
 
-	private Direcao direcao;
 
 	public Inimigo(Direcao direcao) {
 
@@ -66,16 +65,8 @@ public class Inimigo extends Objeto {
 			this.x += VELOCIDADE;
 		}
 
-		if (this.x > ContainerDeJanelas.LARGURA_TELA - 20)
-			direcao = Direcao.ESQUERDA;
-		
-		if (this.x <= 1)
-			direcao = Direcao.DIREITA;
-
-		if (this.y > ContainerDeJanelas.ALTURA_TELA - 20)
-			direcao = Direcao.CIMA;
-
-		if (this.y < 1)
-			direcao = Direcao.BAIXO;
+		if (this.x > 800 || this.y > 600 || this.x < -80  || this.y < -80){
+			isVisivel = false;
+		}
 	}
 }

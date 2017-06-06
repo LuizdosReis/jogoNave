@@ -2,20 +2,23 @@ package model;
 
 import javax.swing.ImageIcon;
 
+import view.ContainerDeJanelas;
+
 public class Missel extends Objeto{
 
-	private static final int LARGURA_TELA = 500;
-	private static final int VELOCIDADE = 2;
+	private static final int VELOCIDADE = 3;
 	
-	private Direcao direcao;
 
 	public Missel(int x, int y, Direcao direcao) {
 
 		this.x = x;
 		this.y = y;
 		this.direcao = direcao;
-
-		ImageIcon referencia = new ImageIcon("res\\missel.png");
+		ImageIcon referencia = null;
+		if (direcao == Direcao.DIREITA || direcao == Direcao.ESQUERDA)
+			referencia = new ImageIcon("res\\missel.png");
+		else
+			referencia = new ImageIcon("res\\missel_vertical.png");
 		imagem = referencia.getImage();
 
 		this.largura = imagem.getWidth(null);
@@ -35,6 +38,11 @@ public class Missel extends Objeto{
 		}else{
 			this.y += VELOCIDADE;
 		}
+		
+		if(this.x > ContainerDeJanelas.LARGURA_TELA || this.x < 0 || this.y > ContainerDeJanelas.ALTURA_TELA || this.y < 0){
+			isVisivel = false;
+		}
+		
 	}
 	
 }

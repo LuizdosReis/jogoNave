@@ -24,8 +24,8 @@ public class Menu implements Estado{
 	public void paint(Graphics2D graficos) {
 		graficos.setColor(Color.WHITE);
 		graficos.setFont(new Font("castellar", Font.PLAIN, 20));
-		graficos.drawString("1 - Iniciar", 180, 150);
-		graficos.drawString("2 - Créditos ( Em desenvolvimento )", 30, 180);
+		graficos.drawString("1 - Iniciar", 250, 210);
+		graficos.drawString("2 - Créditos ( Em desenvolvimento )", 130, 240);
 	}
 
 	@Override
@@ -56,6 +56,12 @@ public class Menu implements Estado{
 
 	public Estado getProximoEstado() {
 		return proximoEstado;
+	}
+
+	@Override
+	public void checarColisoes() {
+		// TODO Auto-generated method stub
+		
 	}
 	
 	

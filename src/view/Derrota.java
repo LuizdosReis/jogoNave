@@ -52,4 +52,10 @@ public class Derrota implements Estado {
 		return valido;
 	}
 
+	@Override
+	public void checarColisoes() {
+		// TODO Auto-generated method stub
+		
+	}
+
 }
