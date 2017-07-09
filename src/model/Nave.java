@@ -1,6 +1,7 @@
 package model;
 
 import java.awt.event.KeyEvent;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -9,10 +10,14 @@ import javax.swing.ImageIcon;
 
 import view.ContainerDeJanelas;
 
-public class Nave extends Objeto {
+public class Nave extends Objeto implements Serializable {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 
 	private int dx, dy;
-
 
 	private List<Objeto> misseis;
 
@@ -169,5 +174,7 @@ public class Nave extends Objeto {
 	public void dobrarForca() {
 		this.forca = this.forca * 2 <= 100 ? this.forca *= 2 : 100;
 	}
+	
+	
 
 }

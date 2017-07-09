@@ -1,5 +1,6 @@
 package model;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.Random;
 
@@ -7,7 +8,13 @@ import javax.swing.ImageIcon;
 
 import view.ContainerDeJanelas;
 
-public class Inimigo extends Objeto {
+public class Inimigo extends Objeto implements Serializable{
+
+	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 
 	private static final int VELOCIDADE = 1;
 

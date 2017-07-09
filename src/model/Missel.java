@@ -1,12 +1,20 @@
 package model;
 
+import java.io.Serializable;
+
 import javax.swing.ImageIcon;
 
 import view.ContainerDeJanelas;
 
-public class Missel extends Objeto{
+public class Missel extends Objeto implements Serializable{
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	
 	private static final int VELOCIDADE = 3;
+	
 	
 
 	public Missel(int x, int y, Direcao direcao) {

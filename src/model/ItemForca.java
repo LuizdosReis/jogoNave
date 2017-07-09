@@ -1,12 +1,18 @@
 package model;
 
+import java.io.Serializable;
 import java.util.Random;
 
 import javax.swing.ImageIcon;
 
 import view.ContainerDeJanelas;
 
-public class ItemForca extends Objeto{
+public class ItemForca extends Objeto implements Serializable{
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 
 	public ItemForca() {
 

@@ -11,6 +11,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
+import javax.swing.ImageIcon;
+
 import model.Direcao;
 import model.Inimigo;
 import model.ItemForca;
@@ -18,6 +20,8 @@ import model.ItemVida;
 import model.Missel;
 import model.Nave;
 import model.Objeto;
+import serializador.Deserializador;
+import serializador.Serializador;
 
 public class Fase implements Estado {
 
@@ -26,7 +30,7 @@ public class Fase implements Estado {
 
 	private int QUANTIDADE_INIMIGOS = 10;
 
-	private HashMap<Integer, Direcao> direcoesInimigo;
+	private HashMap<Integer, Direcao> direcoesInimigo; // static
 	private boolean valido;
 	private Estado proximoEstado;
 	private Objeto itemVida;
@@ -62,11 +66,14 @@ public class Fase implements Estado {
 
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
+		//verifica fim do estado
 		if (inimigosFaltantes <= 0) {
 			proximoEstado = new Chefao(nave);
 			valido = false;
 		}
+		//fim verifica fim do estado
 
+		//atualiza misseis
 		List<Objeto> misseis = nave.getMisseis();
 
 		for (int i = 0; i < misseis.size(); i++) {
@@ -80,18 +87,10 @@ public class Fase implements Estado {
 			}
 
 		}
+		
+		//fim atualiza misseis
 
-		for (int i = 0; i < inimigos.size(); i++) {
-
-			Inimigo in = (Inimigo) inimigos.get(i);
-
-			if (in.isVisivel()) {
-				in.mexer();
-			} else {
-				inimigos.remove(i);
-			}
-
-		}
+		atualizaInimigos();
 
 		if (nave.getVida() <= 25 && this.itemVida == null) {
 			this.itemVida = new ItemVida();
@@ -110,6 +109,20 @@ public class Fase implements Estado {
 
 		nave.mexer();
 		checarColisoes();
+	}
+
+	private void atualizaInimigos() {
+		for (int i = 0; i < inimigos.size(); i++) {
+
+			Inimigo in = (Inimigo) inimigos.get(i);
+
+			if (in.isVisivel()) {
+				in.mexer();
+			} else {
+				inimigos.remove(i);
+			}
+
+		}
 	}
 
 	public void checarColisoes() {
@@ -181,6 +194,42 @@ public class Fase implements Estado {
 	@Override
 	public void keyReleased(KeyEvent e) {
 		nave.keyReleased(e);
+		if(e.getKeyCode() == KeyEvent.VK_F5){
+			Serializador serializador = new Serializador();
+			try {
+				serializador.serializar("C:/Users/Luiz Henrique/Documents/nave/nave",nave);
+				serializador.serializar("C:/Users/Luiz Henrique/Documents/inimigos/inimigos", inimigos);
+			} catch (Exception e1) {
+				e1.printStackTrace();
+			}
+			
+		}
+		
+		if(e.getKeyCode() == KeyEvent.VK_F6){
+			Deserializador deserializador = new Deserializador();
+			try {
+				 nave = (Nave) deserializador.deserializar("C:/Users/Luiz Henrique/Documents/nave/nave");
+				 ImageIcon referencia = new ImageIcon("res\\nave_3.gif");
+				 nave.setImagem(referencia.getImage());
+				 inimigos = (List<Objeto>) deserializador.deserializar("C:/Users/Luiz Henrique/Documents/inimigos/inimigos");
+				 inimigos.forEach(inimigo ->{
+					 int contador = 0;
+					 ImageIcon ref;
+					 if (contador++ % 3 == 0) {
+							ref = new ImageIcon("res\\inimigo_5.gif");
+
+						} else {
+
+							ref = new ImageIcon("res\\inimigo_7.gif");
+						}
+						inimigo.setImagem(referencia.getImage());
+				 });
+			} catch (Exception e1) {
+				e1.printStackTrace();
+			}
+			
+		}
+		
 	}
 
 	@Override
