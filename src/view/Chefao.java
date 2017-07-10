@@ -1,11 +1,9 @@
 package view;
 
-import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
-import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 import model.Boss;
@@ -14,6 +12,7 @@ import model.ItemVida;
 import model.Missel;
 import model.Nave;
 import model.Objeto;
+import model.ObjetoTexto;
 
 public class Chefao implements Estado{
 
@@ -24,12 +23,19 @@ public class Chefao implements Estado{
 	private Estado proximoEstado;
 	private Objeto itemVida;
 	private Objeto itemForca;
+	private ControladorDesenho controladorDesenho;
+	private ControladorColisoes controladorColisoes;
 	
 	public Chefao(Objeto nave) {
 		this.nave = (Nave) nave;
 		this.boss = new Boss();
 		this.valido = true;
-
+		
+		controladorDesenho = new ControladorDesenho();
+		controladorColisoes = new ControladorColisoes();
+		controladorDesenho.addObjeto(nave);
+		controladorDesenho.addObjeto(boss);
+		controladorColisoes.addObjeto(boss);
 	}
 
 	@Override
@@ -52,6 +58,9 @@ public class Chefao implements Estado{
 			}
 
 		}
+		
+		this.controladorDesenho.limparObjetosDependentes();
+		this.controladorDesenho.addObjetosDependentes(misseis);
 
 		List<Objeto> misseisBoss = boss.getMisseis();
 
@@ -63,16 +72,21 @@ public class Chefao implements Estado{
 				m.mexer();
 			} else {
 				misseisBoss.remove(i);
+				this.controladorDesenho.removerObjeto(m);
 			}
 
 		}
 		
 		if (nave.getVida() <= 25 && this.itemVida == null) {
 			this.itemVida = new ItemVida();
+			this.controladorDesenho.addObjeto(this.itemVida);
+			this.controladorColisoes.addObjetoItem(this.itemVida);
 		}
 
 		if (boss.getVida() < 50 && this.itemForca == null && this.nave.getForca() < 100) {
 			this.itemForca = new ItemForca();
+			this.controladorDesenho.addObjeto(this.itemForca);
+			this.controladorColisoes.addObjetoItem(this.itemForca);
 		}
 
 		nave.mexer();
@@ -81,7 +95,9 @@ public class Chefao implements Estado{
 		if (nave.getY() <= (boss.getY()+(boss.getAltura()/2))
 				&& nave.getY()+nave.getAltura() >= (boss.getY()+(boss.getAltura()/2))){
 			if (boss.podeAtirar()){
-				boss.atirar();
+				Objeto missel = boss.atirar();
+				this.controladorColisoes.addObjeto(missel);
+				this.controladorDesenho.addObjeto(missel);
 			}
 		}
 		
@@ -90,69 +106,48 @@ public class Chefao implements Estado{
 
 	public void checarColisoes() {
 
-		Rectangle formaNave = nave.getBounds();
-		Rectangle formaBoss = boss.getBounds();
-		Rectangle formaItemVida;
-		Rectangle formaItemForca;
-		Rectangle formaMissel;
-
-		if (formaNave.intersects(formaBoss)) {
-			nave.dano(25);
-			if (nave.getVida() <= 0) {
-				proximoEstado = new Derrota();
-				valido = false;
-			}
-		}
-
-		List<Objeto> misseis = nave.getMisseis();
-
-		for (int i = 0; i < misseis.size(); i++) {
-
-			Objeto tempMissel = misseis.get(i);
-			formaMissel = tempMissel.getBounds();
-
-			if (formaMissel.intersects(formaBoss)) {
-				Missel missel = (Missel)misseis.get(i);
-				missel.setVisivel(false);
-				boss.dano(nave.getForca());
-			}
-
-		}
-
-		List<Objeto> misseisBoss = boss.getMisseis();
-
-		for (int i = 0; i < misseisBoss.size(); i++) {
-
-			Missel tempMissel = (Missel)misseisBoss.get(i);
-			formaMissel = tempMissel.getBounds();
-
-			if (formaMissel.intersects(formaNave)) {
+		
+		Objeto objeto = controladorColisoes.checarColisaoNave(nave);
+		if (objeto != null){
+			if (objeto instanceof Missel){
 				nave.dano(25);
-				misseisBoss.get(i).setVisivel(false);
+				int i = boss.getMisseis().indexOf(objeto);
+				if (i >= 0)
+					boss.getMisseis().get(i).setVisivel(false);
 				if (nave.getVida() <= 0) {
 					proximoEstado = new Derrota();
 					valido = false;
-				}			
-			}
-
-		}
-		
-		if (itemVida != null) {
-			formaItemVida = itemVida.getBounds();
-			if (formaNave.intersects(formaItemVida)) {
+				}
+			}else if (objeto instanceof ItemVida){
 				nave.setVida(100);
 				itemVida = null;
-			}
-		}
-
-		if (itemForca != null) {
-			formaItemForca = itemForca.getBounds();
-			if (formaNave.intersects(formaItemForca)) {
+				controladorDesenho.removerObjeto(objeto);
+			}else if (objeto instanceof ItemForca){
 				nave.dobrarForca();
 				itemForca = null;
+				controladorDesenho.removerObjeto(objeto);
+			}else if (objeto instanceof Boss){
+				nave.dano(25);
+				if (nave.getVida() <= 0) {
+					proximoEstado = new Derrota();
+					valido = false;
+				}
 			}
 		}
-
+		
+		this.controladorColisoes.addObjetosMisselNave(nave.getMisseis());
+		List<HashMap<String, Objeto>> colisoes = controladorColisoes.checarColisaoMissaoNave();
+		if (colisoes != null){
+			for (HashMap<String, Objeto> map : colisoes) {
+				Objeto missel = map.get("missel");
+				boss.dano(nave.getForca());
+				int i = nave.getMisseis().indexOf(missel);
+				if (i >= 0)
+					nave.getMisseis().get(i).setVisivel(false);
+				
+			}
+		}
+		
 	}
 
 	@Override
@@ -168,41 +163,13 @@ public class Chefao implements Estado{
 
 	@Override
 	public void paint(Graphics2D graficos) {
-		graficos.drawImage(nave.getImagem(), nave.getX(), nave.getY(), null);
-
-		List<Objeto> misseis = nave.getMisseis();
-
-		for (int i = 0; i < misseis.size(); i++) {
-
-			Missel m = (Missel) misseis.get(i);
-			graficos.drawImage(m.getImagem(), m.getX(), m.getY(), null);
-
-		}
-
-		List<Objeto> misseisBoss = boss.getMisseis();
-
-		for (int i = 0; i < misseisBoss.size(); i++) {
-
-			Missel m = (Missel) misseisBoss.get(i);
-			graficos.drawImage(m.getImagem(), m.getX(), m.getY(), null);
-
-		}
-
-		if (this.itemVida != null){
-			graficos.drawImage(itemVida.getImagem(), itemVida.getX(), itemVida.getY(), null);
-		}
-		
-		if (this.itemForca != null){
-			graficos.drawImage(itemForca.getImagem(), itemForca.getX(), itemForca.getY(), null);
-		}
-		
-		graficos.drawImage(boss.getImagem(), boss.getX(), boss.getY(), null);
-
-		graficos.setColor(Color.WHITE);
-		graficos.drawString("Vida Boss: " + boss.getVida() + "%", 5, 15);
-		graficos.drawString("Vida: "+nave.getVida()+"%", 5, 35);
-		graficos.drawString("Força: "+nave.getForca()+"%", 5, 55);
-		
+		ObjetoTexto texto = new ObjetoTexto("Força: "+nave.getForca()+"%", 5, 55);
+		this.controladorDesenho.addObjetoTexto(texto);
+		texto = new ObjetoTexto("Vida Boss: " + boss.getVida() + "%", 5, 15);
+		this.controladorDesenho.addObjetoTexto(texto);
+		texto = new ObjetoTexto("Vida: "+nave.getVida()+"%", 5, 35);
+		this.controladorDesenho.addObjetoTexto(texto);
+		this.controladorDesenho.desenharObjetos(graficos);
 	}
 
 	@Override

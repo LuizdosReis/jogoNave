@@ -1,6 +1,5 @@
 package view;
 
-import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
@@ -20,6 +19,7 @@ import model.ItemVida;
 import model.Missel;
 import model.Nave;
 import model.Objeto;
+import model.ObjetoTexto;
 import serializador.Deserializador;
 import serializador.Serializador;
 
@@ -35,10 +35,13 @@ public class Fase implements Estado {
 	private Estado proximoEstado;
 	private Objeto itemVida;
 	private Objeto itemForca;
-	private int inimigosFaltantes = 10;
+	private Integer inimigosFaltantes = 10;
+	private ControladorDesenho controladorDesenho;
+	private ControladorColisoes controladorColisoes;
 	
 	public Fase() {
-
+		controladorDesenho = new ControladorDesenho();
+		controladorColisoes = new ControladorColisoes();
 		nave = new Nave();
 
 		direcoesInimigo = new HashMap<Integer, Direcao>();
@@ -51,6 +54,8 @@ public class Fase implements Estado {
 
 		valido = true;
 		inimigosFaltantes = 10;
+		
+		controladorDesenho.addObjeto(nave);
 	}
 
 	public void inicializaInimigos() {
@@ -61,11 +66,13 @@ public class Fase implements Estado {
 			int j = new Random().nextInt(3);
 			inimigos.add(new Inimigo(direcoesInimigo.get(j)));
 		}
-
+		System.out.println("inimigos: "+inimigos.size());
+		this.controladorDesenho.addObjetos(inimigos);
+		this.controladorColisoes.addObjetos(inimigos);
 	}
 
 	@Override
-	public void actionPerformed(ActionEvent arg0) {
+	public void actionPerformed(ActionEvent arg0) {		
 		//verifica fim do estado
 		if (inimigosFaltantes <= 0) {
 			proximoEstado = new Chefao(nave);
@@ -81,29 +88,37 @@ public class Fase implements Estado {
 			Missel m = (Missel) misseis.get(i);
 
 			if (m.isVisivel()) {
-				m.mexer();
+				m.mexer();				
 			} else {
 				misseis.remove(i);
 			}
 
 		}
-		
+		this.controladorDesenho.limparObjetosDependentes();
+		this.controladorDesenho.addObjetosDependentes(misseis);
 		//fim atualiza misseis
 
 		atualizaInimigos();
 
 		if (nave.getVida() <= 25 && this.itemVida == null) {
 			this.itemVida = new ItemVida();
+			this.controladorDesenho.addObjeto(this.itemVida);
+			this.controladorColisoes.addObjetoItem(this.itemVida);
 		}
 
 		if (inimigosFaltantes <= 5 && this.itemForca == null && this.nave.getForca() < 100) {
 			this.itemForca = new ItemForca();
+			this.controladorDesenho.addObjeto(this.itemForca);
+			this.controladorColisoes.addObjetoItem(this.itemForca);
 		}
 		
 		if (inimigos.size() < 10){
 			if (new Date().getTime() % 2 == 0){
 				int j = new Random().nextInt(3);
-				inimigos.add(new Inimigo(direcoesInimigo.get(j)));
+				Inimigo ini = new Inimigo(direcoesInimigo.get(j));
+				inimigos.add(ini);
+				this.controladorDesenho.addObjeto(ini);
+				this.controladorColisoes.addObjeto(ini);
 			}
 		}
 
@@ -120,6 +135,7 @@ public class Fase implements Estado {
 				in.mexer();
 			} else {
 				inimigos.remove(i);
+				this.controladorDesenho.removerObjeto(in);
 			}
 
 		}
@@ -127,67 +143,48 @@ public class Fase implements Estado {
 
 	public void checarColisoes() {
 
-		Rectangle formaNave = nave.getBounds();
-		Rectangle formaInimigo;
-		Rectangle formaMissel;
-		Rectangle formaItemVida;
-		Rectangle formaItemForca;
-
-		for (int i = 0; i < inimigos.size(); i++) {
-
-			Inimigo tempInimigo = (Inimigo) inimigos.get(i);
-			formaInimigo = tempInimigo.getBounds();
-
-			if (formaNave.intersects(formaInimigo)) {
+		Objeto objeto = controladorColisoes.checarColisaoNave(nave);
+		if (objeto != null){
+			if (objeto instanceof Inimigo){
 				nave.dano(25);
-				inimigos.get(i).setVisivel(false);
+				int i = inimigos.indexOf(objeto);
+				if (i >= 0)
+					inimigos.get(i).setVisivel(false);
 				if (nave.getVida() <= 0) {
 					proximoEstado = new Derrota();
 					valido = false;
 				}
-			}
-
-		}
-
-		List<Objeto> misseis = nave.getMisseis();
-
-		for (int i = 0; i < misseis.size(); i++) {
-
-			Objeto tempMissel = misseis.get(i);
-			formaMissel = tempMissel.getBounds();
-
-			for (int j = 0; j < inimigos.size(); j++) {
-
-				Inimigo tempInimigo = (Inimigo) inimigos.get(j);
-				formaInimigo = tempInimigo.getBounds();
-
-				if (formaMissel.intersects(formaInimigo)) {
-
-					tempInimigo.setVisivel(false);
-					tempMissel.setVisivel(false);
-					inimigosFaltantes--;
-
-				}
-
-			}
-
-		}
-
-		if (itemVida != null) {
-			formaItemVida = itemVida.getBounds();
-			if (formaNave.intersects(formaItemVida)) {
+				controladorColisoes.removerObjeto(objeto);
+			}else if (objeto instanceof ItemVida){
 				nave.setVida(100);
 				itemVida = null;
-			}
-		}
-
-		if (itemForca != null) {
-			formaItemForca = itemForca.getBounds();
-			if (formaNave.intersects(formaItemForca)) {
+				this.controladorDesenho.removerObjeto(objeto);
+			}else if (objeto instanceof ItemForca){
 				nave.dobrarForca();
 				itemForca = null;
+				this.controladorDesenho.removerObjeto(objeto);
 			}
 		}
+		this.controladorColisoes.addObjetosMisselNave(nave.getMisseis());
+		List<HashMap<String, Objeto>> colisoes = controladorColisoes.checarColisaoMissaoNave();
+		if (colisoes != null){
+			for (HashMap<String, Objeto> map : colisoes) {
+				Objeto missel = map.get("missel");
+				Objeto inimigo = map.get("inimigo");
+				controladorColisoes.removerObjeto(inimigo);
+				controladorColisoes.removerObjetoMisselNave(missel);
+				int i = inimigos.indexOf(inimigo);
+				if (i >= 0)
+					inimigos.get(i).setVisivel(false);
+				
+				i = nave.getMisseis().indexOf(missel);
+				if (i >= 0)
+					nave.getMisseis().get(i).setVisivel(false);
+				
+				inimigosFaltantes--;
+			}
+		}
+		
 
 	}
 
@@ -197,8 +194,9 @@ public class Fase implements Estado {
 		if(e.getKeyCode() == KeyEvent.VK_F5){
 			Serializador serializador = new Serializador();
 			try {
-				serializador.serializar("C:/Users/Luiz Henrique/Documents/nave/nave",nave);
-				serializador.serializar("C:/Users/Luiz Henrique/Documents/inimigos/inimigos", inimigos);
+				serializador.serializar("saved\\nave",nave);
+				serializador.serializar("saved\\inimigos", inimigos);
+				serializador.serializar("saved\\inimigosFaltantes", inimigosFaltantes);
 			} catch (Exception e1) {
 				e1.printStackTrace();
 			}
@@ -208,10 +206,10 @@ public class Fase implements Estado {
 		if(e.getKeyCode() == KeyEvent.VK_F6){
 			Deserializador deserializador = new Deserializador();
 			try {
-				 nave = (Nave) deserializador.deserializar("C:/Users/Luiz Henrique/Documents/nave/nave");
+				 nave = (Nave) deserializador.deserializar("saved\\nave");
 				 ImageIcon referencia = new ImageIcon("res\\nave_3.gif");
 				 nave.setImagem(referencia.getImage());
-				 inimigos = (List<Objeto>) deserializador.deserializar("C:/Users/Luiz Henrique/Documents/inimigos/inimigos");
+				 inimigos = (List<Objeto>) deserializador.deserializar("saved\\inimigos");
 				 inimigos.forEach(inimigo ->{
 					 int contador = 0;
 					 ImageIcon ref;
@@ -224,6 +222,11 @@ public class Fase implements Estado {
 						}
 						inimigo.setImagem(referencia.getImage());
 				 });
+				 inimigosFaltantes = (Integer) deserializador.deserializar("saved\\inimigosFaltantes");
+				 controladorDesenho = new ControladorDesenho();
+				 controladorDesenho.addObjeto(nave);
+				 controladorDesenho.addObjetos(inimigos);
+				 controladorDesenho.addObjetosDependentes(nave.getMisseis());
 			} catch (Exception e1) {
 				e1.printStackTrace();
 			}
@@ -239,36 +242,13 @@ public class Fase implements Estado {
 
 	@Override
 	public void paint(Graphics2D graficos) {
-		graficos.drawImage(nave.getImagem(), nave.getX(), nave.getY(), null);
-
-		List<Objeto> misseis = nave.getMisseis();
-
-		for (int i = 0; i < misseis.size(); i++) {
-
-			Missel m = (Missel) misseis.get(i);
-			graficos.drawImage(m.getImagem(), m.getX(), m.getY(), null);
-
-		}
-
-		for (int i = 0; i < inimigos.size(); i++) {
-
-			Inimigo in = (Inimigo) inimigos.get(i);
-			graficos.drawImage(in.getImagem(), in.getX(), in.getY(), null);
-
-		}
-		
-		if (this.itemVida != null){
-			graficos.drawImage(itemVida.getImagem(), itemVida.getX(), itemVida.getY(), null);
-		}
-		
-		if (this.itemForca != null){
-			graficos.drawImage(itemForca.getImagem(), itemForca.getX(), itemForca.getY(), null);
-		}
-
-		graficos.setColor(Color.WHITE);
-		graficos.drawString("INIMIGOS: " + inimigosFaltantes, 5, 15);
-		graficos.drawString("Vida: " + nave.getVida() + "%", 5, 35);
-		graficos.drawString("Força: "+nave.getForca()+"%", 5, 55);
+		ObjetoTexto texto = new ObjetoTexto("INIMIGOS: " + inimigosFaltantes, 5, 15);
+		this.controladorDesenho.addObjetoTexto(texto);
+		texto = new ObjetoTexto("Vida: " + nave.getVida() + "%", 5, 35);
+		this.controladorDesenho.addObjetoTexto(texto);
+		texto = new ObjetoTexto("Força: "+nave.getForca()+"%", 5, 55);
+		this.controladorDesenho.addObjetoTexto(texto);
+		this.controladorDesenho.desenharObjetos(graficos);
 	}
 
 	@Override

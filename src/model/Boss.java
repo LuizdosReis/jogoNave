@@ -68,9 +68,11 @@ public class Boss extends Objeto implements Serializable{
 
 	}
 
-	public void atirar() {
-		this.misseis.add(new Missel(x, y + altura / 2, Direcao.ESQUERDA));
+	public Objeto atirar() {
+		Objeto missel = new Missel(x, y + altura / 2, Direcao.ESQUERDA);
+		this.misseis.add(missel);
 		this.tempoTiro = new Date().getTime();
+		return missel;
 	}
 	
 	public Boolean podeAtirar(){
