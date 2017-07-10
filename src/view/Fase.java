@@ -191,48 +191,59 @@ public class Fase implements Estado {
 	@Override
 	public void keyReleased(KeyEvent e) {
 		nave.keyReleased(e);
+		
 		if(e.getKeyCode() == KeyEvent.VK_F5){
-			Serializador serializador = new Serializador();
-			try {
-				serializador.serializar("saved\\nave",nave);
-				serializador.serializar("saved\\inimigos", inimigos);
-				serializador.serializar("saved\\inimigosFaltantes", inimigosFaltantes);
-			} catch (Exception e1) {
-				e1.printStackTrace();
-			}
+			serializar();
 			
 		}
 		
 		if(e.getKeyCode() == KeyEvent.VK_F6){
-			Deserializador deserializador = new Deserializador();
-			try {
-				 nave = (Nave) deserializador.deserializar("saved\\nave");
-				 ImageIcon referencia = new ImageIcon("res\\nave_3.gif");
-				 nave.setImagem(referencia.getImage());
-				 inimigos = (List<Objeto>) deserializador.deserializar("saved\\inimigos");
-				 inimigos.forEach(inimigo ->{
-					 int contador = 0;
-					 ImageIcon ref;
-					 if (contador++ % 3 == 0) {
-							ref = new ImageIcon("res\\inimigo_5.gif");
-
-						} else {
-
-							ref = new ImageIcon("res\\inimigo_7.gif");
-						}
-						inimigo.setImagem(referencia.getImage());
-				 });
-				 inimigosFaltantes = (Integer) deserializador.deserializar("saved\\inimigosFaltantes");
-				 controladorDesenho = new ControladorDesenho();
-				 controladorDesenho.addObjeto(nave);
-				 controladorDesenho.addObjetos(inimigos);
-				 controladorDesenho.addObjetosDependentes(nave.getMisseis());
-			} catch (Exception e1) {
-				e1.printStackTrace();
-			}
-			
+			deserializar();
 		}
 		
+	}
+
+	public Fase deserializar()
+	{
+		Deserializador deserializador = new Deserializador();
+		try {
+			 nave = (Nave) deserializador.deserializar("saved\\nave");
+			 ImageIcon referencia = new ImageIcon("res\\nave_3.gif");
+			 nave.setImagem(referencia.getImage());
+			 inimigos = (List<Objeto>) deserializador.deserializar("saved\\inimigos");
+			 inimigos.forEach(inimigo ->{
+				 int contador = 0;
+				 ImageIcon ref;
+				 if (contador++ % 3 == 0) {
+						ref = new ImageIcon("res\\inimigo_5.gif");
+
+					} else {
+
+						ref = new ImageIcon("res\\inimigo_7.gif");
+					}
+					inimigo.setImagem(referencia.getImage());
+			 });
+			 inimigosFaltantes = (Integer) deserializador.deserializar("saved\\inimigosFaltantes");
+			 controladorDesenho = new ControladorDesenho();
+			 controladorDesenho.addObjeto(nave);
+			 controladorDesenho.addObjetos(inimigos);
+			 controladorDesenho.addObjetosDependentes(nave.getMisseis());
+		} catch (Exception e1) {
+			e1.printStackTrace();
+		}
+		return this;
+	}
+
+	public void serializar()
+	{
+		Serializador serializador = new Serializador();
+		try {
+			serializador.serializar("saved\\nave",nave);
+			serializador.serializar("saved\\inimigos", inimigos);
+			serializador.serializar("saved\\inimigosFaltantes", inimigosFaltantes);
+		} catch (Exception e1) {
+			e1.printStackTrace();
+		}
 	}
 
 	@Override

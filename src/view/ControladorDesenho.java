@@ -32,7 +32,6 @@ public class ControladorDesenho {
 			}
 			objetosTexto.clear();
 		}
-		System.out.println(objetos.size());
 	}
 	
 	public void addObjeto(Objeto objeto) {

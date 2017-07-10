@@ -14,6 +14,7 @@ import javax.swing.Timer;
 
 public class Janela extends JPanel implements ActionListener{
 	
+	private static final int DELAY = 5;
 	private Image fundo;
 	private Timer timer;
 	private Estado estado;
@@ -50,7 +51,7 @@ public class Janela extends JPanel implements ActionListener{
 		fundo = referencia.getImage();
 		
 		
-		timer = new Timer(5, this);
+		timer = new Timer(DELAY, this);
 		timer.start();
 	}
 	

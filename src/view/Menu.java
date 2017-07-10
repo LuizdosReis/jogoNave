@@ -25,7 +25,7 @@ public class Menu implements Estado{
 		graficos.setColor(Color.WHITE);
 		graficos.setFont(new Font("castellar", Font.PLAIN, 20));
 		graficos.drawString("1 - Iniciar", 250, 210);
-		graficos.drawString("2 - Créditos ( Em desenvolvimento )", 130, 240);
+		graficos.drawString("2 - Carregar", 250, 240);
 	}
 
 	@Override
@@ -40,6 +40,11 @@ public class Menu implements Estado{
 		
 		if(keyCode == KeyEvent.VK_1 || keyCode == KeyEvent.VK_NUMPAD1){
 			proximoEstado = new Fase();
+			valido = false;
+		}
+		
+		if(keyCode == KeyEvent.VK_2 || keyCode == KeyEvent.VK_NUMPAD2){
+			proximoEstado = new Fase().deserializar();
 			valido = false;
 		}		
 	}
